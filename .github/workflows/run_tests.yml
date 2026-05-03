@@ -2,16 +2,14 @@ name: Run Tests
 
 on:
   push:
-    branches:
-      - master
+    branches: [master, main]
     paths:
       - 'src/**'
       - '**/*.csproj'
       - 'src/Directory.Build.props'
       - 'build/**'
   pull_request:
-    branches:
-      - master
+    branches: [master, main]
     paths:
       - 'src/**'
       - '**/*.csproj'

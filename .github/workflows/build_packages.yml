@@ -2,8 +2,7 @@ name: Build Packages
 
 on:
   push:
-    branches:
-      - master
+    branches: [master, main]
     paths:
       - 'src/**'
       - '**/*.csproj'
@@ -11,8 +10,7 @@ on:
       - 'build/**'
       - 'build.ps1'
   pull_request:
-    branches:
-      - master
+    branches: [master, main]
   workflow_dispatch:
 
 jobs:

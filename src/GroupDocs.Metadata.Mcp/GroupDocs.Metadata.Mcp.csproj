@@ -22,6 +22,27 @@
     <ToolCommandName>groupdocs-metadata-mcp</ToolCommandName>
   </PropertyGroup>
 
+  <!-- Strip native debug symbols (libSkiaSharp.pdb x3 ≈ 243 MB uncompressed)
+       from the published tools/ output BEFORE pack collects it. With these
+       PDBs included the nupkg lands at ~291 MB, exceeding NuGet.org's 250 MB
+       hard limit and failing publish with HTTP 413 RequestEntityTooLarge.
+       The managed-code PDB is preserved — only runtimes/<rid>/native/*.pdb
+       files are removed. We can't symbolize native frames in production
+       anyway. NOTE: <CopyDebugSymbolFilesFromPackages>false</...> does NOT
+       cover this path — runtimes/<rid>/native/*.pdb files reach the publish
+       output via a separate runtime-asset code path that property doesn't
+       intercept. An explicit Delete target after Publish does. -->
+  <Target Name="StripNativeRuntimePdbs" AfterTargets="Publish">
+    <ItemGroup>
+      <_NativeRuntimePdbs Include="$(PublishDir)runtimes/**/*.pdb" />
+    </ItemGroup>
+    <Delete Files="@(_NativeRuntimePdbs)" />
+    <Message
+      Text="StripNativeRuntimePdbs: removed @(_NativeRuntimePdbs->Count()) native PDB file(s) from publish output to keep the nupkg under NuGet.org's 250 MB limit."
+      Importance="high"
+      Condition="@(_NativeRuntimePdbs->Count()) > 0" />
+  </Target>
+
   <ItemGroup>
     <None Include="..\..\assets\icon.png" Pack="true" Visible="false" PackagePath="images\icon.png" />
     <None Include="..\..\README.md" Pack="true" PackagePath="/" />

@@ -46,3 +46,6 @@ codesign.zip
 *.VisualState.xml
 TestResult.xml
 nunit-*.xml
+
+# Claude Code local settings (user-specific allowlists, do not commit)
+.claude/

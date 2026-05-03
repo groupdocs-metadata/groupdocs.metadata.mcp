@@ -2,13 +2,13 @@
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-10-17/server.schema.json",
   "description": "MCP server for GroupDocs.Metadata — read and remove document metadata via AI agents.",
   "name": "io.github.groupdocs-metadata/groupdocs-metadata-mcp",
-  "version": "26.4.4",
+  "version": "26.5.1",
   "packages": [
     {
       "registryType": "nuget",
       "registryBaseUrl": "https://api.nuget.org/v3/index.json",
       "identifier": "GroupDocs.Metadata.Mcp",
-      "version": "26.4.4",
+      "version": "26.5.1",
       "transport": {
         "type": "stdio"
       },

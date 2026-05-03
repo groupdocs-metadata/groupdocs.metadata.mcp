@@ -253,23 +253,23 @@ jobs:
 
       - name: Wait for NuGet.org to index the new version
         # MCP Registry's NuGet ownership check queries api.nuget.org's V3 flat-container index.
-        # That index lags `dotnet nuget push` by 1–10 min (malware scan + signature validation
-        # + CDN propagation). Poll until the version is visible, up to 10 min, then give up.
-        # Must run BEFORE the OIDC login: the registry JWT issued by `mcp-publisher login`
-        # is short-lived (~5 min) and would expire while we wait here.
+        # That index lags `dotnet nuget push` by 1–30+ min (malware scan + signature validation
+        # + CDN propagation). For large nupkgs (≈ 200+ MB) the lag routinely exceeds 10 min.
+        # Poll up to 20 min before giving up. Must run BEFORE the OIDC login: the registry JWT
+        # issued by `mcp-publisher login` is short-lived (~5 min) and would expire while we wait.
         run: |
           VERSION=$(jq -r '.version' src/GroupDocs.Metadata.Mcp/.mcp/server.json)
           echo "Waiting for NuGet.org V3 index to list GroupDocs.Metadata.Mcp $VERSION..."
           for attempt in $(seq 1 20); do
-            if curl -fsSL "https://api.nuget.org/v3-flatcontainer/groupdocs.metadata.mcp/index.json" \
-                 | jq -e --arg v "$VERSION" '.versions | index($v)' > /dev/null; then
-              echo "Indexed after $attempt attempt(s)."
+            if curl -fsSL "https://api.nuget.org/v3-flatcontainer/groupdocs.metadata.mcp/index.json" 2>/dev/null \
+                 | jq -e --arg v "$VERSION" '.versions | index($v)' > /dev/null 2>&1; then
+              echo "Indexed after $attempt attempt(s) (~$((attempt * 60))s)."
               exit 0
             fi
-            echo "Attempt $attempt/20: not indexed yet, sleeping 30s..."
-            sleep 30
+            echo "Attempt $attempt/20: not indexed yet, sleeping 60s..."
+            sleep 60
           done
-          echo "::error::NuGet.org did not index $VERSION within 10 minutes. Re-run this job later."
+          echo "::error::NuGet.org did not index $VERSION within 20 minutes. Re-run this job from the Actions UI once https://www.nuget.org/packages/GroupDocs.Metadata.Mcp/$VERSION returns HTTP 200 — dotnet nuget push --skip-duplicate is idempotent so the publish step will not double-push."
           exit 1
 
       - name: Authenticate with GitHub OIDC

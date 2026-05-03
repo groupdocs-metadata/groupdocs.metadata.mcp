@@ -57,8 +57,7 @@ public static class ReadMetadataTool
                 properties = grouped
             };
 
-            var json = JsonSerializer.Serialize(result, JsonOptions);
-            return output.TruncateText(json);
+            return JsonSerializer.Serialize(result, JsonOptions);
         }
         finally
         {
